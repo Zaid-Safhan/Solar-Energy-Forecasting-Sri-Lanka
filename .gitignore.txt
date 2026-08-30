@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+project_inventory.txt
+project_sizes.txt
+
+.env
+.venv/
+venv/
+
+.DS_Store
+Thumbs.db
