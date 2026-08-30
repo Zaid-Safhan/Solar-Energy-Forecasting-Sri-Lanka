@@ -64,9 +64,9 @@ st.markdown(
         .block-container {
             position: relative;
             z-index: 1;
-            max-width: 1180px;
-            padding-top: 6.9rem;
-            padding-bottom: 3rem;
+            max-width: 1420px;
+            padding-top: 6.55rem;
+            padding-bottom: 2.4rem;
         }
 
         .sticky-brand {
@@ -74,7 +74,7 @@ st.markdown(
             top: 0.75rem;
             left: 50%;
             transform: translateX(-50%);
-            width: min(calc(100% - 2rem), 1180px);
+            width: min(calc(100% - 2rem), 1420px);
             z-index: 10000;
             display: flex;
             align-items: center;
@@ -170,12 +170,12 @@ st.markdown(
             color: var(--navy);
             font-size: 1.28rem;
             font-weight: 760;
-            margin: 1.6rem 0 0.25rem 0;
+            margin: 1.15rem 0 0.20rem 0;
         }
 
         .section-subtitle {
             color: var(--muted);
-            margin: 0 0 0.85rem 0;
+            margin: 0 0 0.60rem 0;
             font-size: 0.93rem;
         }
 
@@ -203,7 +203,7 @@ st.markdown(
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 1rem 1rem 0.85rem 1rem;
+            padding: 0.78rem 0.82rem 0.72rem 0.82rem;
             box-shadow: 0 4px 14px rgba(15, 23, 42, 0.045);
         }
 
@@ -215,7 +215,7 @@ st.markdown(
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 1rem 1.05rem;
-            min-height: 122px;
+            min-height: 112px;
             box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
         }
 
@@ -253,7 +253,7 @@ st.markdown(
             border: 1px solid var(--border);
             border-radius: 14px;
             padding: 0.9rem 1rem;
-            min-height: 88px;
+            min-height: 80px;
             box-shadow: 0 4px 14px rgba(15, 23, 42, 0.035);
         }
 
@@ -311,6 +311,37 @@ st.markdown(
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
             border-radius: 16px;
+        }
+
+
+        /* Small refinements for the compact dashboard layout. */
+        div[data-testid="stMetric"] {
+            min-height: 104px;
+        }
+
+        div[data-testid="stMetricValue"] {
+            font-size: 1.55rem;
+            line-height: 1.15;
+        }
+
+        div[data-testid="stMetricLabel"] {
+            font-size: 0.80rem;
+        }
+
+        /* Keep dataframe/chart blocks visually compact. */
+        div[data-testid="stDataFrame"] {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        /* Reduce excess empty vertical space around charts. */
+        div[data-testid="stVegaLiteChart"] {
+            margin-top: -0.15rem;
+        }
+
+        /* Make section headings inside the two-column results grid feel aligned. */
+        .section-title + .section-subtitle {
+            margin-top: 0;
         }
 
         @media (max-width: 760px) {
@@ -893,20 +924,6 @@ if st.session_state.forecast_result is not None:
     best_row = daily.loc[daily["system_energy_kwh"].idxmax()]
     lowest_row = daily.loc[daily["system_energy_kwh"].idxmin()]
 
-    st.markdown(
-        '<div class="section-title">Forecast Overview</div>',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        f"""
-        <div class="section-subtitle">
-            {escape(st.session_state.forecast_location_name or "Selected location")}
-            · {forecast_capacity:.2f} kWp
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
     sri_lanka_today = datetime.now(
         ZoneInfo("Asia/Colombo")
     ).date()
@@ -920,39 +937,7 @@ if st.session_state.forecast_result is not None:
     else:
         first_day_label = "Next Day"
 
-    m1, m2, m3, m4 = st.columns(4)
-
-    m1.metric(
-        first_day_label,
-        f"{next_day['system_energy_kwh']:.1f} kWh"
-    )
-    m2.metric(
-        "Forecast Total",
-        f"{total_energy:.1f} kWh"
-    )
-    m3.metric(
-        "Daily Average",
-        f"{average_energy:.1f} kWh"
-    )
-
-    with m4:
-        st.metric(
-            "Best Day",
-            best_row["date"].strftime("%d %b")
-        )
-        st.caption(
-            f"{best_row['system_energy_kwh']:.1f} kWh expected"
-        )
-
-    st.markdown(
-        '<div class="section-title">Expected Solar Generation</div>',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        '<div class="section-subtitle">Predicted energy available across the forecast period.</div>',
-        unsafe_allow_html=True,
-    )
-
+    # Prepare the daily generation chart once, then place it in the right column.
     chart_data = daily[["date", "system_energy_kwh"]].copy()
     chart_data["date_label"] = chart_data["date"].dt.strftime("%a %d")
     date_order = chart_data["date_label"].tolist()
@@ -963,7 +948,7 @@ if st.session_state.forecast_result is not None:
             color="#F6B73C",
             cornerRadiusTopLeft=7,
             cornerRadiusTopRight=7,
-            size=48,
+            size=42,
         )
         .encode(
             x=alt.X(
@@ -1002,9 +987,9 @@ if st.session_state.forecast_result is not None:
     labels = (
         alt.Chart(chart_data)
         .mark_text(
-            dy=-11,
+            dy=-10,
             color="#0B1F33",
-            fontSize=12,
+            fontSize=11,
             fontWeight="bold",
         )
         .encode(
@@ -1014,105 +999,181 @@ if st.session_state.forecast_result is not None:
         )
     )
 
-    st.altair_chart(
-        (bars + labels).properties(height=350),
-        use_container_width=True,
-    )
+    # ------------------------------------------------------------------
+    # COMPACT DESKTOP DASHBOARD
+    # Left: forecast overview
+    # Right: expected generation chart
+    # ------------------------------------------------------------------
+    overview_col, generation_col = st.columns([1.16, 1], gap="large")
 
-    st.markdown(
-        '<div class="section-title">Daily Forecast</div>',
-        unsafe_allow_html=True,
-    )
+    with overview_col:
+        st.markdown(
+            '<div class="section-title">Forecast Overview</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            f"""
+            <div class="section-subtitle">
+                {escape(st.session_state.forecast_location_name or "Selected location")}
+                · {forecast_capacity:.2f} kWp
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    display_daily = daily[
-        [
-            "date",
-            "system_energy_kwh",
-            "system_peak_power_kw",
-            "average_cloud_cover",
-            "total_precipitation_mm",
+        m1, m2, m3, m4 = st.columns(4)
+
+        m1.metric(
+            first_day_label,
+            f"{next_day['system_energy_kwh']:.1f} kWh",
+        )
+        m2.metric(
+            "Forecast Total",
+            f"{total_energy:.1f} kWh",
+        )
+        m3.metric(
+            "Daily Average",
+            f"{average_energy:.1f} kWh",
+        )
+
+        with m4:
+            st.metric(
+                "Best Day",
+                best_row["date"].strftime("%d %b"),
+            )
+            st.caption(
+                f"{best_row['system_energy_kwh']:.1f} kWh expected"
+            )
+
+    with generation_col:
+        st.markdown(
+            '<div class="section-title">Expected Solar Generation</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<div class="section-subtitle">Predicted energy across the forecast period.</div>',
+            unsafe_allow_html=True,
+        )
+        st.altair_chart(
+            (bars + labels).properties(height=270),
+            use_container_width=True,
+        )
+
+    # ------------------------------------------------------------------
+    # MAIN RESULTS GRID
+    # Left: daily forecast + insights
+    # Right: hourly forecast
+    # ------------------------------------------------------------------
+    results_left, results_right = st.columns([1.10, 1], gap="large")
+
+    with results_left:
+        st.markdown(
+            '<div class="section-title">Daily Forecast</div>',
+            unsafe_allow_html=True,
+        )
+
+        display_daily = daily[
+            [
+                "date",
+                "system_energy_kwh",
+                "system_peak_power_kw",
+                "average_cloud_cover",
+                "total_precipitation_mm",
+            ]
+        ].copy()
+
+        display_daily["date"] = display_daily["date"].dt.strftime("%a, %d %b")
+        display_daily.columns = [
+            "Date",
+            "Energy",
+            "Peak Power",
+            "Cloud Cover",
+            "Rainfall",
         ]
-    ].copy()
 
-    display_daily["date"] = display_daily["date"].dt.strftime("%a, %d %b")
-    display_daily.columns = [
-        "Date",
-        "Energy",
-        "Peak Power",
-        "Cloud Cover",
-        "Rainfall",
-    ]
+        st.dataframe(
+            display_daily,
+            hide_index=True,
+            use_container_width=True,
+            height=300,
+            column_config={
+                "Energy": st.column_config.NumberColumn(
+                    "Energy",
+                    format="%.2f kWh",
+                ),
+                "Peak Power": st.column_config.NumberColumn(
+                    "Peak Power",
+                    format="%.2f kW",
+                ),
+                "Cloud Cover": st.column_config.NumberColumn(
+                    "Cloud Cover",
+                    format="%.1f %%",
+                ),
+                "Rainfall": st.column_config.NumberColumn(
+                    "Rainfall",
+                    format="%.1f mm",
+                ),
+            },
+        )
 
-    st.dataframe(
-        display_daily,
-        hide_index=True,
-        use_container_width=True,
-        column_config={
-            "Energy": st.column_config.NumberColumn("Energy", format="%.2f kWh"),
-            "Peak Power": st.column_config.NumberColumn(
-                "Peak Power", format="%.2f kW"
-            ),
-            "Cloud Cover": st.column_config.NumberColumn(
-                "Cloud Cover", format="%.1f %%"
-            ),
-            "Rainfall": st.column_config.NumberColumn(
-                "Rainfall", format="%.1f mm"
-            ),
-        },
-    )
-
-    st.markdown(
-        '<div class="section-title">Solar Insights</div>',
-        unsafe_allow_html=True,
-    )
-
-    insight_left, insight_right = st.columns(2)
-    best_date_text = best_row["date"].strftime("%A, %d %B")
-    low_date_text = lowest_row["date"].strftime("%A, %d %B")
-
-    with insight_left:
         st.markdown(
-            f"""
-            <div class="insight-card">
-                <div class="insight-title">☀️ Strongest Solar Day</div>
-                <div class="insight-text">
-                    {best_date_text} has the highest expected generation
-                    at approximately <strong>{best_row['system_energy_kwh']:.1f} kWh</strong>.
-                </div>
-            </div>
-            """,
+            '<div class="section-title">Solar Insights</div>',
             unsafe_allow_html=True,
         )
 
-    with insight_right:
-        st.markdown(
-            f"""
-            <div class="insight-card">
-                <div class="insight-title">⚡ Plan Daytime Energy Use</div>
-                <div class="insight-text">
-                    Higher daytime electricity use may be better scheduled
-                    during stronger solar periods. The lowest daily forecast
-                    in this period is approximately
-                    <strong>{lowest_row['system_energy_kwh']:.1f} kWh</strong>
-                    on {low_date_text}.
+        insight_left, insight_right = st.columns(2)
+        best_date_text = best_row["date"].strftime("%A, %d %B")
+        low_date_text = lowest_row["date"].strftime("%A, %d %B")
+
+        with insight_left:
+            st.markdown(
+                f"""
+                <div class="insight-card">
+                    <div class="insight-title">☀️ Strongest Solar Day</div>
+                    <div class="insight-text">
+                        {best_date_text} has the highest expected generation
+                        at approximately
+                        <strong>{best_row['system_energy_kwh']:.1f} kWh</strong>.
+                    </div>
                 </div>
-            </div>
-            """,
+                """,
+                unsafe_allow_html=True,
+            )
+
+        with insight_right:
+            st.markdown(
+                f"""
+                <div class="insight-card">
+                    <div class="insight-title">⚡ Plan Daytime Energy Use</div>
+                    <div class="insight-text">
+                        Higher daytime electricity use may be better scheduled
+                        during stronger solar periods. The lowest daily forecast
+                        is approximately
+                        <strong>{lowest_row['system_energy_kwh']:.1f} kWh</strong>
+                        on {low_date_text}.
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    with results_right:
+        st.markdown(
+            '<div class="section-title">Hourly Forecast</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<div class="section-subtitle">Inspect the expected solar power for a selected day.</div>',
             unsafe_allow_html=True,
         )
 
-    st.markdown(
-        '<div class="section-title">Hourly Forecast</div>',
-        unsafe_allow_html=True,
-    )
-
-    with st.expander("View hourly solar power", expanded=False):
         available_dates = daily["date"].dt.date.tolist()
 
         selected_date = st.selectbox(
             "Select day",
             options=available_dates,
             format_func=lambda value: value.strftime("%A, %d %B"),
+            key="compact_hourly_day",
         )
 
         selected_hourly = hourly[
@@ -1136,7 +1197,7 @@ if st.session_state.forecast_result is not None:
                     filled=True,
                     fill="#FFFFFF",
                     stroke="#F6B73C",
-                    size=55,
+                    size=45,
                 ),
             )
             .encode(
@@ -1171,7 +1232,7 @@ if st.session_state.forecast_result is not None:
                     ),
                 ],
             )
-            .properties(height=320)
+            .properties(height=230)
         )
 
         st.altair_chart(hourly_line, use_container_width=True)
@@ -1192,27 +1253,34 @@ if st.session_state.forecast_result is not None:
             hourly_table,
             hide_index=True,
             use_container_width=True,
+            height=280,
             column_config={
                 "Power": st.column_config.NumberColumn(
-                    "Power", format="%.2f kW"
+                    "Power",
+                    format="%.2f kW",
                 ),
                 "Cloud Cover": st.column_config.NumberColumn(
-                    "Cloud Cover", format="%.0f %%"
+                    "Cloud Cover",
+                    format="%.0f %%",
                 ),
                 "Temperature": st.column_config.NumberColumn(
-                    "Temperature", format="%.1f °C"
+                    "Temperature",
+                    format="%.1f °C",
                 ),
             },
         )
 
+    # ------------------------------------------------------------------
+    # FORECAST INFORMATION
+    # ------------------------------------------------------------------
     st.markdown(
-        '<div class="section-title">Forecast Details</div>',
+        '<div class="section-title" style="margin-top:1rem;">Forecast Information</div>',
         unsafe_allow_html=True,
     )
 
     generated_at = st.session_state.forecast_generated_at
 
-    detail_1, detail_2, detail_3 = st.columns(3)
+    detail_1, detail_2, detail_3, detail_4 = st.columns(4)
 
     with detail_1:
         st.markdown(
@@ -1239,6 +1307,17 @@ if st.session_state.forecast_result is not None:
         )
 
     with detail_3:
+        st.markdown(
+            f"""
+            <div class="detail-card">
+                <div class="detail-label">Location Elevation</div>
+                <div class="detail-value">{float(elevation):.0f} m</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with detail_4:
         updated_text = (
             generated_at.strftime("%d %b · %H:%M")
             if generated_at
