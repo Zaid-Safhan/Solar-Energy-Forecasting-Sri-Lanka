@@ -31,6 +31,11 @@ The dataset covers representative locations from all 25 districts of Sri Lanka.
 
 Several machine learning models were evaluated and compared. The final forecasting model was selected based on its performance using MAE, MSE, RMSE and R².
 
+## Model File
+
+The trained Random Forest model is stored using Git LFS because of its file size.
+Git LFS should be installed so that the model file is downloaded correctly.
+
 ## Project Structure
 
 - `app.py` – Streamlit web application
