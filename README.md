@@ -44,3 +44,5 @@ Several machine learning models were evaluated and compared. The final forecasti
 
 Python, Streamlit, Pandas, NumPy, Scikit-learn, Altair, SHAP, Open-Meteo API and PVGIS.
 
+requirements.txt contains the dependencies required to run the deployed forecasting application. The development notebooks additionally use Matplotlib, XGBoost, LightGBM, CatBoost and SHAP
+
