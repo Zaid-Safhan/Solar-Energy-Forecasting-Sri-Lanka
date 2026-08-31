@@ -2,8 +2,7 @@
 
 An AI-based solar energy forecasting system developed for residential rooftop solar users in Sri Lanka.
 
-The system uses historical solar and weather data together with machine learning to estimate future solar energy generation
-based on the user's location and installed solar system capacity.
+The system uses historical weather data and modelled photovoltaic output together with machine learning to estimate future solar energy generation based on the user's location and installed solar system capacity.
 
 ## Live Application
 
@@ -19,7 +18,7 @@ https://solar-energy-forecasting-sri-lanka.streamlit.app/
 - Hourly solar generation forecast
 - Weather-based forecasting
 - Forecast charts and summary information
-- Model explainability using feature importance and SHAP
+- Offline model explainability analysis using feature importance and SHAP
 
 ## Data Sources
 
